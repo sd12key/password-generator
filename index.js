@@ -38,7 +38,7 @@ const arguments_processing_array = [
     arg_name: "length",
     arg_length: 2,
     arg_handler_func: process_length_arg,
-    arg_helper_message: `Specify the length of the password (>=${DEFAULT_PASSWORD_LENGTH}, def.${DEFAULT_PASSWORD_LENGTH}, max.${MAX_PASSWORD_LENGTH}).\n`,
+    arg_helper_message: `Specify the password length <number> (>=${DEFAULT_PASSWORD_LENGTH}, def.${DEFAULT_PASSWORD_LENGTH}, max.${MAX_PASSWORD_LENGTH}).\n`,
     arg_processed: false,
   },
   {
@@ -46,7 +46,7 @@ const arguments_processing_array = [
     arg_name: "uppercase",
     arg_length: 1,
     arg_handler_func: process_single_arg,
-    arg_helper_message: "Can include uppercase characters.\n",
+    arg_helper_message: "Password will include uppercase characters.\n",
     arg_processed: false,
     arg_set: DEFAULT_PASSWORD_CHARS.toUpperCase(),
     arg_set_char_count: 0,
@@ -56,7 +56,7 @@ const arguments_processing_array = [
     arg_name: "numbers",
     arg_length: 1,
     arg_handler_func: process_single_arg,
-    arg_helper_message: "Can include numbers as well.\n",
+    arg_helper_message: "Password will include numbers as well.\n",
     arg_processed: false,
     arg_set: NUMBERS,
     arg_set_char_count: 0,
@@ -66,7 +66,7 @@ const arguments_processing_array = [
     arg_name: "special",
     arg_length: 1,
     arg_handler_func: process_single_arg,
-    arg_helper_message: `Can include special characters ${SPECIAL_CHARS} as well.\n`,
+    arg_helper_message: `Include special characters ${SPECIAL_CHARS} as well.\n`,
     arg_processed: false,
     arg_set: SPECIAL_CHARS,
     arg_set_char_count: 0,
@@ -171,6 +171,78 @@ function generate_password(password_length, password_valid_chars) {
   return new_password;
 }
 
+// this function will ensure that the password contains
+// at least one character from each optional set (num, upper, spec)
+function ensure_optional_characters(password) {
+  // we need to track the positions of optional characters in the password
+  // the set will contain the positions of the optional characters
+  const filled_optional_chars = new Set();
+
+  // scroll through the password to count optional characters
+  for (let i = 0; i < password.length; i++) {
+    const char = password[i];
+
+    // check if the character belongs to any optional arg_set
+    arguments_processing_array.forEach((arg) => {
+      if (arg.arg_set && arg.arg_set.includes(char)) {
+        // increase the count for this character set
+        arg.arg_set_char_count++;
+        // remember the position of the optional character
+        filled_optional_chars.add(i);
+      }
+    });
+  }
+
+  //   console.log("filled optional character positions:", filled_optional_chars);
+  //   arguments_processing_array.forEach((arg) => {
+  //     if (arg.arg_set) {
+  //       console.log(`count for ${arg.arg_name}: ${arg.arg_set_char_count}`);
+  //     }
+  //   });
+
+  // convert to array (easier to replace chars)
+  let new_password = password.split("");
+
+  // scroll through arguments_processing_array again
+  // to check the count of optional characters, add if needed
+  // we need at least one character from each optional set
+  // (this only in case the corresponding argument was set)
+  // arg.arg_processed is true if the argument was set at the program run
+  arguments_processing_array.forEach((arg) => {
+    if (arg.arg_set && arg.arg_processed && arg.arg_set_char_count === 0) {
+      // Generate a missing character and find a position for it to replace
+      while (true) {
+        // 1. generate a random position in the password
+        const random_position = Math.floor(Math.random() * password.length);
+
+        // 2. ensure the position is not already taken
+        if (!filled_optional_chars.has(random_position)) {
+          // Generate a random character from the missing set
+          const missing_char = arg.arg_set.charAt(
+            Math.floor(Math.random() * arg.arg_set.length)
+          );
+
+          // 3. replace the character at the selected position
+          new_password[random_position] = missing_char;
+
+          // 4. add the position to filled_optional_chars (mark as taken)
+          filled_optional_chars.add(random_position);
+
+          //   console.log(
+          //     `R\replaced char at pos. ${random_position} with "${missing_char}" for set "${arg.arg_name}"`
+          //   );
+
+          // replacement is done, break the loop
+          break;
+        }
+      }
+    }
+  });
+
+  // back to string and return
+  return new_password.join("");
+}
+
 let password_length = DEFAULT_PASSWORD_LENGTH;
 let password_chars = DEFAULT_PASSWORD_CHARS;
 
@@ -182,6 +254,8 @@ console.log("(run with --help to see available options)\n");
 
 console.log("---> password_length    ---> " + password_length + " characters");
 const generated_password = generate_password(password_length, password_chars);
-console.log("---> generated password ---> " + generated_password);
+console.log("--->           password ---> " + generated_password);
+const updated_password = ensure_optional_characters(generated_password);
+console.log("---> generated password ---> " + updated_password);
 
 process.exit(0);
