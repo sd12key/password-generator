@@ -1,0 +1,17 @@
+{
+  "name": "password-generator",
+  "version": "1.0.0",
+  "description": "SD12 QAP1 Password Generator",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \\\"NO TEST SPECIFIED\\\" && exit 1",
+	"passgen": "node index.js"
+  },
+  "keywords": [
+    "cli",
+    "nodejs",
+    "node.js"
+  ],
+  "author": "Eugene Kepich",
+  "license": "ISC"
+}
