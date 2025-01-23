@@ -1,12 +1,12 @@
 # Password Generator CLI
 
-A simple command-line interface (CLI) tool for generating random passwords. The tool is designed to provide flexibility with customizable password lengths and easy-to-use options.
+A simple command-line interface (CLI) tool for generating random passwords. 
 
 ## Features
 
 - Generate random passwords using lowercase alphabetic characters.
 - Specify the password length with a simple argument.
-- Built-in help to guide users on available options.
+- Help option displays usage guide.
 - Validates user inputs to avoid common errors.
 
 ## Installation
