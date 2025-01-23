@@ -1,6 +1,7 @@
+// new version of password generator, with command line arguments
 const process = require("process");
 
-const APP_VERSION = "1.0.0";
+const APP_VERSION = "2.0.0";
 const DEFAILT_ARG_PREFIXES = ["--", "-", "/"];
 const DEFAULT_PASSWORD_CHARS = "abcdefghijklmnopqrstuvwxyz";
 const DEFAULT_PASSWORD_LENGTH = 8;
