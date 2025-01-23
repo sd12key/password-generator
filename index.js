@@ -7,13 +7,12 @@ const DEFAULT_PASSWORD_LENGTH = 8;
 const MAX_PASSWORD_LENGTH = 64;
 
 // console out error message and exit with code 1
-function display_error_message(error_type, custom_message) {
+function display_error_message(error_type, custom_message = "") {
   const ERROR_STR = "Error:";
   const error_messages = {
     argument_unrecognized:
       "Unrecognized parameter! Use --help for available options.",
-    argument_duplicate:
-      "Duplicate argument! Each parameter should only be used once.",
+    argument_duplicate: `Duplicate argument (${custom_message})! Each parameter (except help) must appear once.`,
     length_argument_missing: "Missing or invalid value for length parameter.",
     length_argument_integer: "Length must be a positive number.",
   };
@@ -24,6 +23,7 @@ function display_error_message(error_type, custom_message) {
 const arguments_processing_array = [
   {
     arg_flags: ["help", "h", "?"],
+    arg_name: "help",
     arg_length: 1,
     arg_handler_func: process_help_arg,
     arg_helper_message: "Show this help message.",
@@ -31,9 +31,10 @@ const arguments_processing_array = [
   },
   {
     arg_flags: ["length", "len", "l"],
+    arg_name: "length",
     arg_length: 2,
     arg_handler_func: process_length_arg,
-    arg_helper_message: "Specify the length of the password (>=8, default 8).",
+    arg_helper_message: `Specify the length of the password (>=${DEFAULT_PASSWORD_LENGTH}, def.${DEFAULT_PASSWORD_LENGTH}, max.${MAX_PASSWORD_LENGTH}).`,
     arg_processed: false,
   },
 ];
@@ -69,7 +70,7 @@ function analyze_program_arguments(passed_arguments) {
         )
       ) {
         if (argument.arg_processed) {
-          display_error_message("argument_duplicate");
+          display_error_message("argument_duplicate", argument.arg_name);
         } else {
           argument.arg_handler_func(passed_arguments, i);
           argument.arg_processed = true;
