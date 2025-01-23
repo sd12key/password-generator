@@ -17,5 +17,5 @@ Make sure you have [Node.js](https://nodejs.org/) installed on your system.
 2. Run the tool using `npm` of `node` in your terminal.
 
 ## Usage
-`npm passgen [options]`
+`npm run passgen [options]`
 `node index.js [options]`
