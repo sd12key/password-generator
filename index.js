@@ -1,6 +1,6 @@
 const process = require("process");
 
-const APP_VERSION = "0.0.1";
+const APP_VERSION = "1.0.0";
 const DEFAILT_ARG_PREFIXES = ["--", "-", "/"];
 const DEFAULT_PASSWORD_CHARS = "abcdefghijklmnopqrstuvwxyz";
 const DEFAULT_PASSWORD_LENGTH = 8;
@@ -20,6 +20,7 @@ function display_error_message(error_type, custom_message = "") {
   process.exit(1);
 }
 
+//array of objects with argument processing data
 const arguments_processing_array = [
   {
     arg_flags: ["help", "h", "?"],
@@ -39,6 +40,7 @@ const arguments_processing_array = [
   },
 ];
 
+// function to process help argument
 function process_help_arg() {
   console.log("\nUsage: node run passgen [options]\n");
 
@@ -53,12 +55,15 @@ function process_help_arg() {
   process.exit(0);
 }
 
+// function to process length argument
 function process_length_arg(passed_arguments, index) {
+  // check if there is a next argument
   const next_arg = passed_arguments[index + 1];
   if (!next_arg) {
     display_error_message("length_argument_missing");
   }
 
+  // try parsing to an integer
   const length = parseInt(next_arg, 10);
   if (
     isNaN(length) ||
@@ -71,23 +76,27 @@ function process_length_arg(passed_arguments, index) {
   password_length = length;
 }
 
+// function to process arguments
 function analyze_program_arguments(passed_arguments) {
-  console.log("Processing arguments");
+  // console.log("Processing arguments");
+  // loop through all arguments
   for (let i = 0; i < passed_arguments.length; ) {
     const arg = passed_arguments[i];
     let is_recognized = false;
 
+    // for each argument, check if it is recognized
     for (const argument of arguments_processing_array) {
       if (
         argument.arg_flags.some((flag) =>
           DEFAILT_ARG_PREFIXES.some((prefix) => arg === prefix + flag)
         )
       ) {
+        // if was already processed, display error message (no duplicates)
         if (argument.arg_processed) {
           display_error_message("argument_duplicate", argument.arg_name);
         } else {
-          argument.arg_handler_func(passed_arguments, i);
           argument.arg_processed = true;
+          argument.arg_handler_func(passed_arguments, i);
         }
         is_recognized = true;
 
@@ -97,6 +106,7 @@ function analyze_program_arguments(passed_arguments) {
       }
     }
 
+    // if argument is not recognized, display error message
     if (!is_recognized) {
       display_error_message("argument_unrecognized");
     } else {
@@ -108,6 +118,7 @@ function analyze_program_arguments(passed_arguments) {
   }
 }
 
+// function to generate password (from lowercase letters)
 function generate_password(password_length, password_valid_chars) {
   const char_count = {};
   let new_password = "";
