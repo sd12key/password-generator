@@ -1,8 +1,8 @@
 // new version of password generator, with command line arguments
 const process = require("process");
 
-const APP_VERSION = "2.0.0";
-const DEFAILT_ARG_PREFIXES = ["--", "-", "/"];
+const APP_VERSION = "0.0.2";
+const DEFAULT_ARG_PREFIXES = ["--", "-", "/"];
 const DEFAULT_PASSWORD_CHARS = "abcdefghijklmnopqrstuvwxyz";
 const DEFAULT_PASSWORD_LENGTH = 8;
 const MAX_PASSWORD_LENGTH = 64;
@@ -39,6 +39,16 @@ const arguments_processing_array = [
     arg_helper_message: `Specify the length of the password (>=${DEFAULT_PASSWORD_LENGTH}, def.${DEFAULT_PASSWORD_LENGTH}, max.${MAX_PASSWORD_LENGTH}).`,
     arg_processed: false,
   },
+  {
+    arg_flags: ["uppercase", "upper", "u"],
+    arg_name: "uppercase",
+    arg_length: 1,
+    arg_handler_func: process_uppercase_arg,
+    arg_helper_message: `Use uppercase characters as well.`,
+    arg_processed: false,
+    arg_set: DEFAULT_PASSWORD_CHARS.toUpperCase(),
+    arg_set_char_count: 0,
+  },
 ];
 
 // function to process help argument
@@ -46,7 +56,7 @@ function process_help_arg() {
   console.log("\nUsage: npm run passgen [options]\n");
 
   arguments_processing_array.forEach((argument) => {
-    const possible_flags = DEFAILT_ARG_PREFIXES.map((prefix) =>
+    const possible_flags = DEFAULT_ARG_PREFIXES.map((prefix) =>
       argument.arg_flags.map((flag) => prefix + flag).join(", ")
     ).join(", ");
     console.log(possible_flags);
@@ -77,31 +87,43 @@ function process_length_arg(passed_arguments, index) {
   password_length = length;
 }
 
-// function to process arguments
+function process_uppercase_arg() {
+  console.log("Uppercase message");
+  const arg_array_index = arguments_processing_array.find(
+    (arg) => arg.arg_name === "uppercase"
+  );
+  console.log(arg_array_index);
+  password_chars += arg_array_index.arg_set;
+}
+
 function analyze_program_arguments(passed_arguments) {
   // console.log("Processing arguments");
-  // loop through all arguments
+  // loop through all program arguments
   for (let i = 0; i < passed_arguments.length; ) {
     const arg = passed_arguments[i];
     let is_recognized = false;
 
     // for each argument, check if it is recognized
+    // we look through all arguments_processing_array objects
     for (const argument of arguments_processing_array) {
       if (
         argument.arg_flags.some((flag) =>
-          DEFAILT_ARG_PREFIXES.some((prefix) => arg === prefix + flag)
+          DEFAULT_ARG_PREFIXES.some((prefix) => arg === prefix + flag)
         )
       ) {
-        // if was already processed, display error message (no duplicates)
+        // check if the argument is already processed, do not allow duplicates
         if (argument.arg_processed) {
           display_error_message("argument_duplicate", argument.arg_name);
         } else {
+          // this is where we call the handler function for the argument
+          // it is responsible for processing the argument
           argument.arg_processed = true;
           argument.arg_handler_func(passed_arguments, i);
         }
         is_recognized = true;
 
         // increment i by the number of parts of the argument (1+) to skip them
+        // currently is it only for the length argument
         i += argument.arg_length;
         break;
       }
