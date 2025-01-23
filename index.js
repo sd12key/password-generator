@@ -7,7 +7,7 @@ const DEFAULT_PASSWORD_LENGTH = 8;
 const MAX_PASSWORD_LENGTH = 64;
 
 // console out error message and exit with code 1
-function display_error_message(error_type) {
+function display_error_message(error_type, custom_message) {
   const ERROR_STR = "Error:";
   const error_messages = {
     argument_unrecognized:
@@ -24,20 +24,32 @@ function display_error_message(error_type) {
 const arguments_processing_array = [
   {
     arg_flags: ["help", "h", "?"],
+    arg_length: 1,
     arg_handler_func: process_help_arg,
-    arg_helper_message: "Show help message",
+    arg_helper_message: "Show this help message.",
     arg_processed: false,
   },
   {
     arg_flags: ["length", "len", "l"],
+    arg_length: 2,
     arg_handler_func: process_length_arg,
-    arg_helper_message: "Specify the length of the password (>=8, default 8)",
+    arg_helper_message: "Specify the length of the password (>=8, default 8).",
     arg_processed: false,
   },
 ];
 
 function process_help_arg() {
-  console.log("Help message");
+  console.log("\nUsage: node run passgen [options]\n");
+
+  arguments_processing_array.forEach((argument) => {
+    const possible_flags = DEFAILT_ARG_PREFIXES.map((prefix) =>
+      argument.arg_flags.map((flag) => prefix + flag).join(", ")
+    ).join(", ");
+    console.log(possible_flags);
+    console.log(argument.arg_helper_message);
+  });
+
+  process.exit(0);
 }
 
 function process_length_arg() {
@@ -45,8 +57,8 @@ function process_length_arg() {
 }
 
 function analyze_program_arguments(passed_arguments) {
-  console.log("Processing agruments");
-  for (let i = 0; i < passed_arguments.length; i++) {
+  console.log("Processing arguments");
+  for (let i = 0; i < passed_arguments.length; ) {
     const arg = passed_arguments[i];
     let is_recognized = false;
 
@@ -63,13 +75,21 @@ function analyze_program_arguments(passed_arguments) {
           argument.arg_processed = true;
         }
         is_recognized = true;
+
+        // increment i by the number of parts of the argument (1+) to skip them
+        i += argument.arg_length;
         break;
       }
     }
 
     if (!is_recognized) {
       display_error_message("argument_unrecognized");
+    } else {
+      continue;
     }
+
+    // for one-part arguments, increment i by 1
+    i++;
   }
 }
 
