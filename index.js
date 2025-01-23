@@ -13,8 +13,8 @@ function display_error_message(error_type, custom_message = "") {
     argument_unrecognized:
       "Unrecognized parameter! Use --help for available options.",
     argument_duplicate: `Duplicate argument (${custom_message})! Each parameter (except help) must appear once.`,
-    length_argument_missing: "Missing or invalid value for length parameter.",
-    length_argument_integer: "Length must be a positive number.",
+    length_argument_missing: "Missing value for length parameter.",
+    length_argument_integer: `Length must be an integer between ${DEFAULT_PASSWORD_LENGTH} and ${MAX_PASSWORD_LENGTH}.`,
   };
   console.error(ERROR_STR, error_messages[error_type] || "Unknown failure!");
   process.exit(1);
@@ -53,8 +53,22 @@ function process_help_arg() {
   process.exit(0);
 }
 
-function process_length_arg() {
-  console.log("Length message");
+function process_length_arg(passed_arguments, index) {
+  const next_arg = passed_arguments[index + 1];
+  if (!next_arg) {
+    display_error_message("length_argument_missing");
+  }
+
+  const length = parseInt(next_arg, 10);
+  if (
+    isNaN(length) ||
+    length < DEFAULT_PASSWORD_LENGTH ||
+    length > MAX_PASSWORD_LENGTH
+  ) {
+    display_error_message("length_argument_integer");
+  }
+
+  password_length = length;
 }
 
 function analyze_program_arguments(passed_arguments) {
