@@ -4,6 +4,8 @@ const process = require("process");
 const APP_VERSION = "0.0.2";
 const DEFAULT_ARG_PREFIXES = ["--", "-", "/"];
 const DEFAULT_PASSWORD_CHARS = "abcdefghijklmnopqrstuvwxyz";
+const NUMBERS = "0123456789";
+const SPECIAL_CHARS = "!@#$%^&*()_+[]?~\\/{}";
 const DEFAULT_PASSWORD_LENGTH = 8;
 const MAX_PASSWORD_LENGTH = 64;
 
@@ -28,7 +30,7 @@ const arguments_processing_array = [
     arg_name: "help",
     arg_length: 1,
     arg_handler_func: process_help_arg,
-    arg_helper_message: "Show this help message.",
+    arg_helper_message: "Show this help message.\n",
     arg_processed: false,
   },
   {
@@ -36,22 +38,41 @@ const arguments_processing_array = [
     arg_name: "length",
     arg_length: 2,
     arg_handler_func: process_length_arg,
-    arg_helper_message: `Specify the length of the password (>=${DEFAULT_PASSWORD_LENGTH}, def.${DEFAULT_PASSWORD_LENGTH}, max.${MAX_PASSWORD_LENGTH}).`,
+    arg_helper_message: `Specify the length of the password (>=${DEFAULT_PASSWORD_LENGTH}, def.${DEFAULT_PASSWORD_LENGTH}, max.${MAX_PASSWORD_LENGTH}).\n`,
     arg_processed: false,
   },
   {
     arg_flags: ["uppercase", "upper", "u"],
     arg_name: "uppercase",
     arg_length: 1,
-    arg_handler_func: process_uppercase_arg,
-    arg_helper_message: `Use uppercase characters as well.`,
+    arg_handler_func: process_single_arg,
+    arg_helper_message: "Can include uppercase characters.\n",
     arg_processed: false,
     arg_set: DEFAULT_PASSWORD_CHARS.toUpperCase(),
     arg_set_char_count: 0,
   },
+  {
+    arg_flags: ["numbers", "num", "n"],
+    arg_name: "numbers",
+    arg_length: 1,
+    arg_handler_func: process_single_arg,
+    arg_helper_message: "Can include numbers as well.\n",
+    arg_processed: false,
+    arg_set: NUMBERS,
+    arg_set_char_count: 0,
+  },
+  {
+    arg_flags: ["special", "spec", "s"],
+    arg_name: "special",
+    arg_length: 1,
+    arg_handler_func: process_single_arg,
+    arg_helper_message: `Can include special characters ${SPECIAL_CHARS} as well.\n`,
+    arg_processed: false,
+    arg_set: SPECIAL_CHARS,
+    arg_set_char_count: 0,
+  },
 ];
 
-// function to process help argument
 function process_help_arg() {
   console.log("\nUsage: npm run passgen [options]\n");
 
@@ -67,7 +88,7 @@ function process_help_arg() {
 }
 
 // function to process length argument
-function process_length_arg(passed_arguments, index) {
+function process_length_arg(passed_arguments, index, agr_array_index) {
   // check if there is a next argument
   const next_arg = passed_arguments[index + 1];
   if (!next_arg) {
@@ -87,17 +108,13 @@ function process_length_arg(passed_arguments, index) {
   password_length = length;
 }
 
-function process_uppercase_arg() {
-  console.log("Uppercase message");
-  const arg_array_index = arguments_processing_array.find(
-    (arg) => arg.arg_name === "uppercase"
-  );
-  console.log(arg_array_index);
+function process_single_arg(passed_arguments, index, arg_array_index) {
+  //   console.log(arg_array_index);
   password_chars += arg_array_index.arg_set;
 }
 
 function analyze_program_arguments(passed_arguments) {
-  // console.log("Processing arguments");
+  //   console.log("Processing arguments");
   // loop through all program arguments
   for (let i = 0; i < passed_arguments.length; ) {
     const arg = passed_arguments[i];
@@ -118,7 +135,7 @@ function analyze_program_arguments(passed_arguments) {
           // this is where we call the handler function for the argument
           // it is responsible for processing the argument
           argument.arg_processed = true;
-          argument.arg_handler_func(passed_arguments, i);
+          argument.arg_handler_func(passed_arguments, i, argument);
         }
         is_recognized = true;
 
