@@ -42,7 +42,7 @@ const arguments_processing_array = [
 
 // function to process help argument
 function process_help_arg() {
-  console.log("\nUsage: node run passgen [options]\n");
+  console.log("\nUsage: npm run passgen [options]\n");
 
   arguments_processing_array.forEach((argument) => {
     const possible_flags = DEFAILT_ARG_PREFIXES.map((prefix) =>
