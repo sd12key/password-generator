@@ -254,7 +254,7 @@ console.log("(run with --help to see available options)\n");
 
 console.log("---> password_length    ---> " + password_length + " characters");
 const generated_password = generate_password(password_length, password_chars);
-console.log("--->           password ---> " + generated_password);
+// console.log("--->           password ---> " + generated_password);
 const updated_password = ensure_optional_characters(generated_password);
 console.log("---> generated password ---> " + updated_password);
 
